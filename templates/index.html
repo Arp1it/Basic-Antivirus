@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberScan - Advanced Threat Detection</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Courier+Prime:wght@400;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            font-family: 'Courier Prime', monospace;
+            color: #00ff41;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Matrix-style background animation */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .matrix-rain {
+            position: absolute;
+            top: -100px;
+            font-size: 14px;
+            color: #00ff41;
+            animation: rain 10s linear infinite;
+        }
+
+        @keyframes rain {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Grid overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            border-bottom: 2px solid #00ff41;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff0040, #00ff41, #ff0040, transparent);
+            animation: pulse-line 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-line {
+
+            0%,
+            100% {
+                opacity: 0.5;
+                transform: translateX(-50%) scaleX(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateX(-50%) scaleX(1.5);
+            }
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff41, #ff0040, #0066ff, #00ff41);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 3s ease infinite;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+        }
+
+        @keyframes gradient-shift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #888;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        .creator-credit {
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            color: #00ff41;
+            margin-top: 15px;
+            opacity: 1;
+            letter-spacing: 1px;
+            text-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
+            font-weight: 400;
+            display: block;
+        }
+
+        /* Main scanner area */
+        .scanner-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .upload-section,
+        .results-section {
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+            position: relative;
+        }
+
+        .upload-section::before,
+        .results-section::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ff41, #ff0040, #0066ff, #00ff41);
+            border-radius: 10px;
+            z-index: -1;
+            animation: border-glow 4s linear infinite;
+        }
+
+        @keyframes border-glow {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            color: #00ff41;
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* File upload area */
+        .upload-area {
+            border: 3px dashed #00ff41;
+            border-radius: 10px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #ff0040;
+            background: rgba(255, 0, 64, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            border-color: #ff0040;
+            background: rgba(255, 0, 64, 0.2);
+            box-shadow: 0 0 30px rgba(255, 0, 64, 0.3);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #00ff41;
+        }
+
+        .upload-subtext {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Scan button */
+        .scan-btn {
+            background: linear-gradient(45deg, #00ff41, #0066ff);
+            border: none;
+            color: #000;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .scan-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+        }
+
+        .scan-btn:active {
+            transform: scale(0.95);
+        }
+
+        .scan-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results section */
+        .scan-progress {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff41, #0066ff);
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: progress-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes progress-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
+            }
+        }
+
+        .scan-result {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .result-clean {
+            background: rgba(0, 255, 65, 0.1);
+            border: 2px solid #00ff41;
+        }
+
+        .result-infected {
+            background: rgba(255, 0, 64, 0.1);
+            border: 2px solid #ff0040;
+        }
+
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .result-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-details {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        /* Error messages */
+        .error-message {
+            background: rgba(255, 0, 64, 0.1);
+            border: 2px solid #ff0040;
+            color: #ff0040;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            display: none;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .scanner-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .upload-area {
+                padding: 40px 20px;
+            }
+
+            .upload-icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="matrix-bg" id="matrix"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">CYBERSCAN</h1>
+            <p class="tagline">Advanced Threat Detection System</p>
+            <div class="creator-credit">by Echo Cipher</div>
+        </header>
+
+        <!-- Main Scanner -->
+        <div class="scanner-container">
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <h2 class="section-title">📁 File Upload</h2>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">🛡️</div>
+                        <div class="upload-text">Drop file here or click to browse</div>
+                        <div class="upload-subtext">Supported: All file types • Max size: 100MB</div>
+                    </div>
+                    <input type="file" name="file" id="fileInput" class="file-input" required>
+                    <div class="error-message" id="errorMessage"></div>
+                    <div style="text-align: center;">
+                        <button type="submit" class="scan-btn" id="scanBtn">🔍 Initiate Scan</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section">
+                <h2 class="section-title">📊 Scan Results</h2>
+
+                <div class="scan-progress" id="scanProgress">
+                    <div>🔄 Uploading and analyzing file...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div id="progressText">Initializing scan engines...</div>
+                </div>
+
+                <div class="scan-result result-clean" id="resultClean">
+                    <div class="result-icon">✅</div>
+                    <div class="result-text">FILE SECURE</div>
+                    <div>No threats detected</div>
+                    <div class="result-details" id="cleanDetails"></div>
+                </div>
+
+                <div class="scan-result result-infected" id="resultInfected">
+                    <div class="result-icon">⚠️</div>
+                    <div class="result-text">THREAT DETECTED</div>
+                    <div>Malicious content found</div>
+                    <div class="result-details" id="infectedDetails"></div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px; color: #666;">
+                    <div>🔒 Encrypted Connection</div>
+                    <div>🛡️ Zero-Log Policy</div>
+                    <div>⚡ Real-time Analysis</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Matrix rain effect
+        function createMatrixRain() {
+            const matrix = document.getElementById('matrix');
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+            for (let i = 0; i < 20; i++) {
+                const rain = document.createElement('div');
+                rain.className = 'matrix-rain';
+                rain.style.left = Math.random() * 100 + '%';
+                rain.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                rain.style.animationDelay = Math.random() * 2 + 's';
+                rain.textContent = chars[Math.floor(Math.random() * chars.length)];
+                matrix.appendChild(rain);
+
+                setTimeout(() => {
+                    rain.remove();
+                }, 10000);
+            }
+        }
+
+        setInterval(createMatrixRain, 500);
+
+        // File upload functionality
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadForm = document.getElementById('uploadForm');
+        const scanBtn = document.getElementById('scanBtn');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let selectedFile = null;
+
+        // Upload area click handler
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+                fileInput.files = files;
+            }
+        });
+
+        // File input change handler
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            selectedFile = file;
+
+            // Check file size (100MB limit)
+            if (file.size > 100 * 1024 * 1024) {
+                showError('File size exceeds 100MB limit');
+                return;
+            }
+
+            hideError();
+
+            uploadArea.innerHTML = `
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">${file.name}</div>
+                <div class="upload-subtext">Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+            `;
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        // Form submission handler
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!selectedFile) {
+                showError('Please select a file first');
+                return;
+            }
+
+            await uploadAndScan();
+        });
+
+        async function uploadAndScan() {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            // Show progress
+            showProgress();
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showResult(result);
+                } else {
+                    showError(result.error || 'Upload failed');
+                    hideProgress();
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+                hideProgress();
+            }
+        }
+
+        function showProgress() {
+            const progress = document.getElementById('scanProgress');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const resultClean = document.getElementById('resultClean');
+            const resultInfected = document.getElementById('resultInfected');
+
+            // Hide results and errors
+            resultClean.style.display = 'none';
+            resultInfected.style.display = 'none';
+            hideError();
+
+            // Show progress
+            progress.style.display = 'block';
+            scanBtn.disabled = true;
+
+            const stages = [
+                'Uploading file to server...',
+                'Analyzing file structure...',
+                'Checking signature database...',
+                'Running heuristic analysis...',
+                'Scanning for known threats...',
+                'Performing behavioral analysis...',
+                'Finalizing results...'
+            ];
+
+            let currentStage = 0;
+            let currentProgress = 0;
+
+            const progressInterval = setInterval(() => {
+                currentProgress += Math.random() * 12 + 3;
+
+                if (currentProgress > 95) {
+                    currentProgress = 95; // Keep at 95% until real result comes
+                }
+
+                progressFill.style.width = currentProgress + '%';
+
+                if (currentStage < stages.length && currentProgress > (currentStage * 15)) {
+                    progressText.textContent = stages[currentStage];
+                    currentStage++;
+                }
+            }, 600);
+
+            // Store interval ID to clear it later
+            window.currentProgressInterval = progressInterval;
+        }
+
+        function hideProgress() {
+            const progress = document.getElementById('scanProgress');
+            progress.style.display = 'none';
+            scanBtn.disabled = false;
+
+            if (window.currentProgressInterval) {
+                clearInterval(window.currentProgressInterval);
+            }
+        }
+
+        function showResult(result) {
+            hideProgress();
+
+            const resultClean = document.getElementById('resultClean');
+            const resultInfected = document.getElementById('resultInfected');
+            const cleanDetails = document.getElementById('cleanDetails');
+            const infectedDetails = document.getElementById('infectedDetails');
+
+            if (result.status === 'clean') {
+                resultClean.style.display = 'block';
+                cleanDetails.innerHTML = `
+                    <strong>Scan Details:</strong><br>
+                    File: ${result.filename || 'Unknown'}<br>
+                    Size: ${result.filesize || 'Unknown'}<br>
+                    Scan Time: ${result.scan_time || 'Unknown'}<br>
+                    Engines Used: ${result.engines || 'Multiple'}
+                `;
+            } else if (result.status === 'infected') {
+                resultInfected.style.display = 'block';
+                infectedDetails.innerHTML = `
+                    <strong>Threat Details:</strong><br>
+                    File: ${result.filename || 'Unknown'}<br>
+                    Threat: ${result.threat_name || 'Unknown malware'}<br>
+                    Risk Level: ${result.risk_level || 'High'}<br>
+                    Action: File quarantined
+                `;
+            } else {
+                showError('Invalid scan result received');
+            }
+        }
+
+        // Reset form when clicking upload area after a file is selected
+        uploadArea.addEventListener('click', () => {
+            if (selectedFile) {
+                // Reset the form for new upload
+                selectedFile = null;
+                fileInput.value = '';
+                uploadArea.innerHTML = `
+                    <div class="upload-icon">🛡️</div>
+                    <div class="upload-text">Drop file here or click to browse</div>
+                    <div class="upload-subtext">Supported: All file types • Max size: 100MB</div>
+                `;
+                hideError();
+                document.getElementById('resultClean').style.display = 'none';
+                document.getElementById('resultInfected').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
