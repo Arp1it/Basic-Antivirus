@@ -18,8 +18,6 @@ ddaa = [('36f4b2be18a0ff7f7f9ct6e755ab0aeafc4198a71cf50305693e821aed890879', 'fa
 
 # Insert example data
 for i in ddaa:
-    if i in ddaa:
-        continue
     cursor.execute(f'''
         INSERT INTO FileHashes (sha256, md5, virus_type)
         VALUES
